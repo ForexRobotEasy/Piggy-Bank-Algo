@@ -1,0 +1,91 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                              Piggy Bank Algo.mq5 |
+//|                   Copyright 2022, Forex Robot Easy Team         |
+//|                                       https://forexroboteasy.com |
+//+------------------------------------------------------------------+
+
+//--- Define constants
+#property copyright 'Copyright 2022, Forex Robot Easy Team'
+#property link      'https://forexroboteasy.com'
+#property version   '1.00'
+#property strict
+
+//--- Import libraries
+#include <Trade\Trade.mqh>
+
+//--- Global variables
+CTrade trade; // Trade object for executing trades
+
+//--- Expert initialization function
+int OnInit()
+{
+   //--- Initialize trade object
+   trade.SetExpertMagicNumber(123456); // Set magic number for trades
+   
+   return(INIT_SUCCEEDED);
+}
+
+//--- Expert deinitialization function
+void OnDeinit(const int reason)
+{
+   //--- Cleanup trade object
+   trade.CleanUp();
+}
+
+//--- Expert tick processing function
+void OnTick()
+{
+   //--- Perform market analysis and make trading decisions
+   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID); // Get current bid price
+   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK); // Get current ask price
+   
+   //--- Example of a simple trading strategy
+   if (bid > ask)
+   {
+      // Buy signal
+      double lotSize = 0.01; // Set lot size for the trade
+      double stopLoss = bid - 100; // Set stop loss level
+      double takeProfit = bid + 100; // Set take profit level
+      
+      //--- Execute trade
+      trade.Buy(_Symbol, lotSize, stopLoss, takeProfit);
+   }
+   else
+   {
+      // Sell signal
+      double lotSize = 0.01; // Set lot size for the trade
+      double stopLoss = ask + 100; // Set stop loss level
+      double takeProfit = ask - 100; // Set take profit level
+      
+      //--- Execute trade
+      trade.Sell(_Symbol, lotSize, stopLoss, takeProfit);
+   }
+}
+
+//--- Expert tick function
+void OnTrade()
+{
+   //--- Check for completed trades and handle them
+   for (int i = trade.PositionsTotal() - 1; i >= 0; i--)
+   {
+      if (trade.PositionSelectByIndex(i))
+      {
+         if (trade.PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY)
+         {
+            // Handle completed buy trade
+            double profit = trade.PositionGetDouble(POSITION_PROFIT);
+            Print('Buy trade completed with profit: ', profit);
+         }
+         else if (trade.PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_SELL)
+         {
+            // Handle completed sell trade
+            double profit = trade.PositionGetDouble(POSITION_PROFIT);
+            Print('Sell trade completed with profit: ', profit);
+         }
+      }
+   }
+}
+
+//--- Other necessary functions and event handlers
+// ...
